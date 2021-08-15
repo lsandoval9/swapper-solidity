@@ -2,7 +2,7 @@
 pragma solidity ^0.6.0;
 
 import "./interfaces/UniswapV2Router02";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/release-v3.2.0/contracts/token/ERC20/ERC20Upgradeable.sol";
+import "./interfaces/IERC20Upgradeable";
 import "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/release-v3.2.0/contracts/proxy/Initializable.sol";
 
 contract ToolV1 is Initializable {

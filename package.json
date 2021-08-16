@@ -3,6 +3,8 @@
     "devDependencies": {
         "@nomiclabs/hardhat-ethers": "^2.0.2",
         "@nomiclabs/hardhat-waffle": "^2.0.1",
+        "@openzeppelin/contracts-upgradeable": "^3.2.0",
+        "@openzeppelin/hardhat-upgrades": "^1.9.0",
         "@types/chai": "^4.2.21",
         "@types/mocha": "^9.0.0",
         "@types/node": "^16.4.13",
@@ -10,12 +12,14 @@
         "ethereum-waffle": "^3.4.0",
         "ethers": "^5.4.4",
         "hardhat": "^2.6.0",
+        "hardhat-gas-reporter": "^1.0.4",
         "ts-node": "^10.2.0",
         "typescript": "^4.3.5"
     },
     "scripts": {
         "fork": "nhh node",
-        "deploy": "echo hello world",
+        "deploy": "npx hardhat run --network localhost scripts/deployV1.ts",
+        "deployUpgraded": "npx hardhat run --network localhost scripts/deployUpgradedV2.ts",
         "test": "npx hardhat test"
     }
 }

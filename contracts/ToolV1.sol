@@ -12,9 +12,16 @@ contract ToolV1 is Initializable {
 
     IUniswapV2Router02 uniswapRouter;
 
-    IERC20Upgradeable token; // = ERC20Upgradeable(0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa);
+    IERC20Upgradeable token;
 
     using SafeMathUpgradeable for uint256;
+
+    modifier nonEmptyValue() {
+
+        require(msg.value > 0, "please,");
+
+        _;
+    }
 
     function initialize(address _uniswapV2Address) public initializer {
         uniswapRouter = IUniswapV2Router02(_uniswapV2Address);
@@ -25,6 +32,8 @@ contract ToolV1 is Initializable {
         return
             IERC20Upgradeable(_token).approve(address(uniswapRouter), _amount);
     }
+
+
 
     function swapETHForTokens(
         uint256 _minAmount,
@@ -45,7 +54,7 @@ contract ToolV1 is Initializable {
         );
     }
 
-    function swap(
+    function swapETHForSpecifiedTokens (
         address _to,
         address[] memory _tokensAddress,
         uint256[] memory _percentage

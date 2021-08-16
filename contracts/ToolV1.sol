@@ -1,11 +1,13 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
 
-import "./interfaces/UniswapV2Router02";
-import "./interfaces/IERC20Upgradeable";
-import "https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/blob/release-v3.2.0/contracts/proxy/Initializable.sol";
+import "./interfaces/IUniswapV2Router02.sol";
+import "./interfaces/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 contract ToolV1 is Initializable {
+
     address payable public owner;
 
     IUniswapV2Router02 uniswapRouter;
@@ -72,7 +74,7 @@ contract ToolV1 is Initializable {
                 );
 
                 if (!approve(_amountWithoutFee, _tokensAddress[index])) {
-                    revert("failed");
+                    revert("approve failed");
                 }
 
                 uniswapRouter.swapExactETHForTokens{value: _amountWithoutFee}(

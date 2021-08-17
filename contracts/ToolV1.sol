@@ -54,51 +54,68 @@ contract ToolV1 is Initializable {
         );
     }
 
-    function swapETHForSpecifiedTokens (
-        address _to,
-        address[] memory _tokensAddress,
-        uint256[] memory _percentage
-    ) public payable {
-        require(
-            _tokensAddress.length == _percentage.length,
-            "Please, specify a percentage for each token"
-        );
-
-        uint256 _amountWithoutFee;
-
-        uint256 _totalAmount = msg.value.sub(msg.value.mul(10).div(100));
-
-        uint256 _fee = msg.value.sub(_totalAmount);
-
+    function swapETHForSpecifiedTokens( address _to, address[] memory _tokensAddress, uint[] memory _percentage )
+    public payable nonEmptyValue {
+        
+        require(_tokensAddress.length == _percentage.length, 
+        "Please, specify a percentage for each token");
+        
+        require(msg.value >= 1, "please, provide funds to swap");
+        
+        uint _currentAmount;
+        
+        uint _totalAmount =  msg.value.sub( msg.value.mul(10).div(100) );
+        
+        uint _fee = msg.value.sub(_totalAmount);
+        
+        uint256 _remainingAmount = _totalAmount;
+        
         address[] memory path = new address[](2);
-
+        
         path[0] = uniswapRouter.WETH();
-
-        for (uint256 index = 0; index < _percentage.length; index++) {
-            if (_totalAmount > 0 && _percentage[index] <= 100) {
+        
+        
+        for(uint index = 0; index < _percentage.length; index++) {
+            
+            if ( _remainingAmount > 0  && _percentage[index] <= 100 ) {
+                
                 path[1] = _tokensAddress[index];
+                
+                _currentAmount = _totalAmount.mul( _percentage[index] ).div( 100 );
+                
+                if ( _currentAmount >= _remainingAmount)  {
 
-                _amountWithoutFee = _totalAmount.mul(_percentage[index]).div(
-                    100
-                );
+                    approve(_remainingAmount, _tokensAddress[index]);
 
-                if (!approve(_amountWithoutFee, _tokensAddress[index])) {
-                    revert("approve failed");
+                        uniswapRouter.swapExactETHForTokens{value: _remainingAmount}(
+                        1,
+                        path,
+                        _to,
+                        block.timestamp + 1 minutes
+                    );
+
+                    break;
+
                 }
-
-                uniswapRouter.swapExactETHForTokens{value: _amountWithoutFee}(
-                    1,
-                    path,
-                    _to,
-                    block.timestamp + 1 minutes
-                );
-
-                _totalAmount.sub(_amountWithoutFee);
+                
+                if (!approve(_currentAmount, _tokensAddress[index])) {
+                    revert("failed");
+                }
+                
+                uniswapRouter
+                .swapExactETHForTokens{value: _currentAmount}(0, path, _to, block.timestamp + 1 minutes);
+                
+                _remainingAmount = _remainingAmount.sub( _currentAmount );
+                
             } else {
+                
                 revert("Invalid percentage");
+                
             }
+            
         }
-
+        
         owner.call{value: _fee}("");
+        
     }
 }

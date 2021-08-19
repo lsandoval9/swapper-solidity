@@ -25,12 +25,17 @@ contract ToolV2 is Initializable {
         _;
     }
 
-    function initialize(address _uniswapV2Address, address _kyberNetworkProxy)
+    function initialize(address _uniswapV2Address)
         public
         initializer
     {
         uniswapRouter = IUniswapV2Router02(_uniswapV2Address);
         owner = msg.sender;
+    }
+
+    function migrate( address _kyberNetworkProxy) public {
+        require(msg.sender == owner);
+
         kyberNetworkProxy = IKyberNetworkProxy(_kyberNetworkProxy);
     }
 

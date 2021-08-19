@@ -19,7 +19,10 @@
     "scripts": {
         "fork": "nhh node",
         "deploy": "npx hardhat run --network localhost scripts/deployV1.ts",
-        "deployUpgraded": "npx hardhat run --network localhost scripts/deployUpgradedV2.ts",
+        "upgrade": "npx hardhat run --network localhost scripts/deployUpgradedV2.ts",
         "test": "npx hardhat test"
+    },
+    "dependencies": {
+        "dotenv": "^10.0.0"
     }
 }

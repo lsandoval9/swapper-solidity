@@ -1,5 +1,7 @@
 import "@nomiclabs/hardhat-waffle";
 import '@openzeppelin/hardhat-upgrades';
+import { ethers, upgrades } from "hardhat";
+require('dotenv').config()
 
 import { task } from "hardhat/config";
 
@@ -13,11 +15,6 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
     }
 });
 
-task("upgrade", "upgrade the deployed contract", async (contractAddress, hre) => {
-
-    console.log(contractAddress)
-
-}).addParam("address", "the adress", "address");
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more

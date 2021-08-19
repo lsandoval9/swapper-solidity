@@ -19,7 +19,8 @@ async function main() {
     /* Deploy upgradeable contract, we need to pass the factory as the first argument and 
         UniswapRouterV2 address as the second one 
     */
-    const toolV1Contract = await HRE.upgrades.deployProxy(toolV1Factory, ["0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"]);
+    const toolV1Contract = await HRE
+    .upgrades.deployProxy(toolV1Factory, ["0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"]);
 
     await toolV1Contract.deployed();
 

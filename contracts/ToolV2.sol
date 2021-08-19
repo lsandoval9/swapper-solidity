@@ -72,7 +72,7 @@ contract ToolV2 is Initializable {
 
         uint256 _currentAmount;
 
-        uint256 _totalAmount = msg.value.sub(msg.value.mul(1).div(100));
+        uint256 _totalAmount = msg.value.sub(msg.value.mul(1).div(1000));
 
         uint256 _fee = msg.value.sub(_totalAmount);
 

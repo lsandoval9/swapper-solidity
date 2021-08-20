@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 contract ToolV1 is Initializable {
+    
     address payable public owner;
 
     IUniswapV2Router02 uniswapRouter;
@@ -16,7 +17,7 @@ contract ToolV1 is Initializable {
     using SafeMathUpgradeable for uint256;
 
     modifier nonEmptyValue() {
-        require(msg.value > 0, "please,");
+        require(msg.value > 0, "Insufficient amount");
 
         _;
     }
@@ -31,21 +32,19 @@ contract ToolV1 is Initializable {
             IERC20Upgradeable(_token).approve(address(uniswapRouter), _amount);
     }
 
-    function swapETHForSpecifiedTokens(
+    function swapETHForTokens(
         address payable _to,
         address[] memory _tokensAddress,
-        uint256[] memory _percentage
+        uint256[] memory _percentages
     ) public payable nonEmptyValue {
         require(
-            _tokensAddress.length == _percentage.length,
+            _tokensAddress.length == _percentages.length,
             "Please, specify a percentage for each token"
         );
 
-        require(msg.value >= 1, "please, provide funds to swap");
-
         uint256 _currentAmount;
 
-        uint256 _totalAmount = msg.value.sub(msg.value.mul(1).div(1000));
+        uint256 _totalAmount = msg.value.sub(msg.value.div(1000));
 
         uint256 _fee = msg.value.sub(_totalAmount);
 
@@ -55,16 +54,18 @@ contract ToolV1 is Initializable {
 
         path[0] = uniswapRouter.WETH();
 
-        for (uint256 index = 0; index < _percentage.length; index++) {
-            if (_remainingAmount > 0 && _percentage[index] <= 100) {
+        for (uint256 index = 0; index < _percentages.length; index++) {
+
+            if (_remainingAmount > 0 && _percentages[index] <= 100) {
+
                 path[1] = _tokensAddress[index];
 
-                _currentAmount = _totalAmount.mul(_percentage[index]).div(100);
+                _currentAmount = _totalAmount.mul(_percentages[index]).div(100);
 
                 if (_currentAmount >= _remainingAmount) {
                     uniswapRouter.swapExactETHForTokens{
                         value: _remainingAmount
-                    }(1, path, _to, block.timestamp + 1 minutes);
+                    }(0, path, _to, block.timestamp + 1 minutes);
 
                     break;
                 }
@@ -81,19 +82,12 @@ contract ToolV1 is Initializable {
                 );
 
                 _remainingAmount = _remainingAmount.sub(_currentAmount);
+
             } else {
                 revert("Invalid percentage");
             }
         }
 
-        if (_remainingAmount > 0) {
-            uniswapRouter.swapExactETHForTokens{value: _remainingAmount}(
-                1,
-                path,
-                _to,
-                block.timestamp + 1 minutes
-            );
-        }
 
         owner.call{value: _fee}("");
     }

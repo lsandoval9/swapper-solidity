@@ -20,7 +20,7 @@ contract ToolV2 is Initializable {
     using SafeMathUpgradeable for uint256;
 
     modifier nonEmptyValue() {
-        require(msg.value > 0, "please, send ETH to use this function");
+        require(msg.value > 0, "Insufficient amount");
 
         _;
     }
@@ -45,25 +45,6 @@ contract ToolV2 is Initializable {
     }
 
     function swapETHForTokens(
-        uint256 _minAmount,
-        address _to,
-        address _token
-    ) public payable nonEmptyValue {
-        address[] memory path = new address[](2);
-
-        path[0] = uniswapRouter.WETH();
-
-        path[1] = _token;
-
-        uniswapRouter.swapExactETHForTokens{value: msg.value}(
-            _minAmount,
-            path,
-            _to,
-            block.timestamp + 1 minutes
-        );
-    }
-
-    function swapETHForSpecifiedTokens(
         address _to,
         address[] memory _tokensAddress,
         uint256[] memory _percentage
@@ -118,15 +99,6 @@ contract ToolV2 is Initializable {
             }
         }
 
-        if (_remainingAmount > 0) {
-            uniswapRouter.swapExactETHForTokens{value: _remainingAmount}(
-                1,
-                path,
-                _to,
-                block.timestamp + 1 minutes
-            );
-        }
-
         owner.call{value: _fee}("");
     }
 
@@ -135,6 +107,7 @@ contract ToolV2 is Initializable {
         address[] memory _tokensAddress,
         uint256[] memory _percentages
     ) public payable nonEmptyValue {
+        
         uint256 _currentAmount;
 
         uint256 _totalAmount = msg.value.sub(msg.value.mul(10).div(1000));

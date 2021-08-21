@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
 contract ToolV1 is Initializable {
     
+
     address payable public owner;
 
     IUniswapV2Router02 uniswapRouter;
@@ -25,11 +26,6 @@ contract ToolV1 is Initializable {
     function initialize(address _uniswapV2Address) public initializer {
         uniswapRouter = IUniswapV2Router02(_uniswapV2Address);
         owner = msg.sender;
-    }
-
-    function approve(uint256 _amount, address _token) private returns (bool) {
-        return
-            IERC20Upgradeable(_token).approve(address(uniswapRouter), _amount);
     }
 
     function swapETHForTokens(
@@ -68,10 +64,6 @@ contract ToolV1 is Initializable {
                     }(0, path, _to, block.timestamp + 1 minutes);
 
                     break;
-                }
-
-                if (!approve(_currentAmount, _tokensAddress[index])) {
-                    revert("failed");
                 }
 
                 uniswapRouter.swapExactETHForTokens{value: _currentAmount}(

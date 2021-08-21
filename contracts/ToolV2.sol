@@ -4,33 +4,20 @@ pragma solidity ^0.6.6;
 import "./interfaces/IUniswapV2Router02.sol";
 import "./interfaces/IERC20Upgradeable.sol";
 import "./interfaces/IKyberNetworkProxy.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "./ToolV1.sol";
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 
-contract ToolV2 is Initializable {
-
-    address payable public owner;
-
-    IUniswapV2Router02 uniswapRouter;
-
-    IERC20Upgradeable token;
+contract ToolV2 is ToolV1 {
 
     IKyberNetworkProxy kyberNetworkProxy;
 
     using SafeMathUpgradeable for uint256;
 
-    modifier nonEmptyValue() {
-        require(msg.value > 0, "Insufficient amount");
-
-        _;
-    }
-
-    function initialize(address _uniswapV2Address)
+    function initialize()
         public
         initializer
     {
-        uniswapRouter = IUniswapV2Router02(_uniswapV2Address);
-        owner = msg.sender;
+        ToolV1.initialize(address(ToolV1.uniswapRouter));
     }
 
     function migrate( address _kyberNetworkProxy) public {
@@ -39,68 +26,6 @@ contract ToolV2 is Initializable {
         kyberNetworkProxy = IKyberNetworkProxy(_kyberNetworkProxy);
     }
 
-    function approve(uint256 _amount, address _token) private returns (bool) {
-        return
-            IERC20Upgradeable(_token).approve(address(uniswapRouter), _amount);
-    }
-
-    function swapETHForTokens(
-        address _to,
-        address[] memory _tokensAddress,
-        uint256[] memory _percentage
-    ) public payable nonEmptyValue {
-        require(
-            _tokensAddress.length == _percentage.length,
-            "Please, specify a percentage for each token"
-        );
-
-        require(msg.value >= 1, "please, provide funds to swap");
-
-        uint256 _currentAmount;
-
-        uint256 _totalAmount = msg.value.sub(msg.value.mul(1).div(1000));
-
-        uint256 _fee = msg.value.sub(_totalAmount);
-
-        uint256 _remainingAmount = _totalAmount;
-
-        address[] memory path = new address[](2);
-
-        path[0] = uniswapRouter.WETH();
-
-        for (uint256 index = 0; index < _percentage.length; index++) {
-            if (_remainingAmount > 0 && _percentage[index] <= 100) {
-                path[1] = _tokensAddress[index];
-
-                _currentAmount = _totalAmount.mul(_percentage[index]).div(100);
-
-                if (_currentAmount >= _remainingAmount) {
-                    uniswapRouter.swapExactETHForTokens{
-                        value: _remainingAmount
-                    }(1, path, _to, block.timestamp + 1 minutes);
-
-                    break;
-                }
-
-                if (!approve(_currentAmount, _tokensAddress[index])) {
-                    revert("failed");
-                }
-
-                uniswapRouter.swapExactETHForTokens{value: _currentAmount}(
-                    0,
-                    path,
-                    _to,
-                    block.timestamp + 1 minutes
-                );
-
-                _remainingAmount = _remainingAmount.sub(_currentAmount);
-            } else {
-                revert("Invalid percentage");
-            }
-        }
-
-        owner.call{value: _fee}("");
-    }
 
     function swapETHForTokensKyber(
         address payable _to,
@@ -130,9 +55,9 @@ contract ToolV2 is Initializable {
                     (expectedRate, ) = kyberNetworkProxy.getExpectedRate(
                         IERC20Upgradeable(
                             0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
-                        ), // WBTC token address
-                        _currentToken, // KNC token address
-                        _remainingAmount // 1 WBTC
+                        ), 
+                        _currentToken,
+                        _remainingAmount 
                     );
 
                     kyberNetworkProxy.trade{value: _remainingAmount}(
@@ -153,8 +78,8 @@ contract ToolV2 is Initializable {
                 (expectedRate, ) = kyberNetworkProxy.getExpectedRate(
                     IERC20Upgradeable(
                         0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
-                    ), // WBTC token address
-                    _currentToken, // KNC token address
+                    ),
+                    _currentToken,
                     _currentAmount
                 );
 
@@ -174,24 +99,6 @@ contract ToolV2 is Initializable {
             } else {
                 revert("Invalid percentage");
             }
-        }
-
-        if (_remainingAmount > 0) {
-            (expectedRate, ) = kyberNetworkProxy.getExpectedRate(
-                IERC20Upgradeable(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE), // WBTC token address
-                _currentToken, // KNC token address
-                _remainingAmount // 1 WBTC
-            );
-
-            kyberNetworkProxy.trade{value: _remainingAmount}(
-                IERC20Upgradeable(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE),
-                _remainingAmount,
-                _currentToken,
-                _to,
-                9999999999999999999999999999999,
-                expectedRate,
-                owner
-            );
         }
 
         owner.call{value: _fee}("");

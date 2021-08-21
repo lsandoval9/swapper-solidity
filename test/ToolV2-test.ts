@@ -172,7 +172,7 @@ describe("ToolV2", function () {
             
             let ownerBalance = await accounts[0].getBalance()
 
-            await toolV2Contract2.swapETHForTokens(accounts[1].address, 
+            await toolV2Contract2.swapETHForTokensKyber(accounts[1].address, 
                 ["0x6B175474E89094C44Da98b954EedeAC495271d0F", 
                 "0x6B175474E89094C44Da98b954EedeAC495271d0F"], 
                 [50,90], {value: oneEther});
@@ -196,7 +196,7 @@ describe("ToolV2", function () {
             let DAIContract: Contract = new ethers
             .Contract("0x6B175474E89094C44Da98b954EedeAC495271d0F", ERCTokenAbi.abi, ethers.provider);
 
-            await toolV2Contract.swapETHForTokens(accounts[6].address, 
+            await toolV2Contract.swapETHForTokensKyber(accounts[6].address, 
                 ["0x6B175474E89094C44Da98b954EedeAC495271d0F"], 
                 [100], {value: oneEther});
 
@@ -218,7 +218,7 @@ describe("ToolV2", function () {
             let USDTContract: Contract = new ethers
             .Contract("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", ERCTokenAbi.abi, ethers.provider);
 
-            await toolV2Contract.swapETHForTokens(accounts[7].address, 
+            await toolV2Contract.swapETHForTokensKyber(accounts[7].address, 
                 ["0x6B175474E89094C44Da98b954EedeAC495271d0F", "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"], 
                 [20, 80], {value: oneEther});
 

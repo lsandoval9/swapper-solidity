@@ -1,7 +1,8 @@
 import "@nomiclabs/hardhat-waffle";
 import '@openzeppelin/hardhat-upgrades';
 import { ethers, upgrades } from "hardhat";
-require('dotenv').config()
+import "hardhat-gas-reporter";
+require('dotenv').config();
 
 import { task } from "hardhat/config";
 
@@ -30,7 +31,7 @@ module.exports = {
                 settings: {
                     optimizer: {
                         enabled: true,
-                        runs: 200,
+                        runs: 400,
                     },
                 },
             },
@@ -47,5 +48,9 @@ module.exports = {
 
     mocha: {
         timeout: 20000
+    },
+
+    gasReporter: {
+        enabled: true,
     }
 };
